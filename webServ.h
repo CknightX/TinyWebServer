@@ -4,11 +4,13 @@ class webServ
 {
 	public:
 		webServ(int _port);
-		void ServStart();
-		void ServClose();
+		void servStart();
+		void servClose();
+		~webServ();
 	private:
-		void _OpenListenfd();
-		int port;
-		int listenfd,connfd;
+		void _openListenfd();
+		void _doit();
+		void _clientError();
+		int listenfd,connfd,port;
 };
 #endif
