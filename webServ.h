@@ -10,7 +10,12 @@ class webServ
 	private:
 		void _openListenfd();
 		void _doit();
-		void _clientError();
+		void _clientError(string _num,string _reason,string _text);
+		void _printRequest(rio_t *rp);
+		void _servStatic();
+		void _servDynamic();
 		int listenfd,connfd,port;
+		string filename,cgiargs,filetype;
+		int filesize;
 };
 #endif

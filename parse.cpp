@@ -1,15 +1,19 @@
 #include "parse.h"
 parse::parse(string uri)
-	:uri(_uri)
+	:_uri(uri)
 {
 	_parseUri();
 }
 void parse::_parseUri()
 {
-	if (uri.find("cgi-bin")==-1)  //Static content	
+	if (_uri.find("cgi-bin")==-1)  //Static content	
 	{
-		filename="."+uri+"index.html";
-		cgiargs="";
+		_filename="."+uri;
+		if (uri=="/")
+			_filename+="index.html";
+		_cgiargs="";
+		int index=uri.find_last_of('.');
+		_filetype=uri.substr(index,uri.length()-index);
 	}
 	else   //Dynamic content
 	{
@@ -28,7 +32,7 @@ void parse::_parseUri()
 }
 bool parse::isStatic()
 {
-	return (filename=="./index.html");
+	return (uri.find("cgi-bin")==-1);
 }
 string parse::uri()
 {
@@ -41,4 +45,8 @@ string parse::filename()
 string parse::cgiargs()
 {
 	return _cgiargs;
+}
+string parse::filetype()
+{
+	return _filetype;
 }

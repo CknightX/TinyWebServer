@@ -1,4 +1,5 @@
 #include "webServ.h"
+#include "parse.h"
 webServ::webServ(int _port)
 	:port(_port)
 {
@@ -41,7 +42,6 @@ void webServ::_doit()
 	int is_static;
 	stat sbuf;
 	char buf[MAXLINE],method[MAXLINE],uri[MAXLINE],version[MAXLINE];
-	char filename[MAXLINE],cgiargs[MAXLINE];
 	Rio_readinitb(&rio,fd);
 	Rio_readlineb(&rio,buf,MAXLINE);
 	sscanf(buf,"%s %s %s",method,uri,version);
@@ -51,7 +51,11 @@ void webServ::_doit()
 		return;
 	}
 	read_requesthdrs(&rio);
-	is_static=parse_uri(uri,filename,cgiargs);
+	parse parseUri(string(buf));
+	filename=parseUri.filename();
+	cgiargs=parseUri.cgiargs();
+	filetype=parseUri.filetype();
+	is_static=parseUri.isStatic();
 	if (stat(filename,&sbuf)<0)
 	{
 		_clientError(filename,"403","Forbidden","Tiny couldn't read the file");
@@ -75,6 +79,40 @@ void webServ::_doit()
 		}
 		servDynamic(filename,cgiargs);
 	}
+
+}
+void webServ::_printRequest(rio_t *rp)
+{
+	char buf[MAXLINE];
+	Rio_readlineb(rp,buf,MAXLINE);
+	while(strcmp(buf,"\r\n"))
+	{
+		Rio_readlineb(rp,buf,MAXLINE);
+		printf("%s",buf);
+	}
+	return;
+}
+void webServ::_servStatic()
+{
+	string header="";
+	//Send response headers to client
+	header+="HTTP/1.0 200 OK\r\n";
+	header+="Server: Tiny Web Server\r\n";
+	header+=("Content-length: "+filesize+"\r\n");
+	header+=("Content-type: "+filetype+"\r\n\r\n");
+	Rio_write(connfd,header.c_str(),header.length());
+
+	//send response body to client
+	char *srcp;
+	int srcfd;
+	srcfd=Open(filename,O_RDONLY,0);
+	srcp=Mmap(0,filesize,PROT_READ,MAP_PRIVATE,srcfd,0);
+	Close(srcfd);
+	Rio_writen(fd,srcp,filesize);
+	Munmap(srcp,filesize);
+}
+void webServ::_servDynamic()
+{
 
 }
 void webServ::servClose()
