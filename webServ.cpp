@@ -113,6 +113,13 @@ void webServ::_servStatic()
 }
 void webServ::_servDynamic()
 {
+	string header="";
+	//Send response headers to client
+	header+="HTTP/1.0 200 OK\r\n";
+	header+="Server: Tiny Web Server\r\n";
+	header+=("Content-length: "+filesize+"\r\n");
+	header+=("Content-type: "+filetype+"\r\n\r\n");
+	Rio_write(connfd,header.c_str(),header.length());
 
 }
 void webServ::servClose()
