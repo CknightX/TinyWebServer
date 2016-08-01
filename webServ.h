@@ -1,5 +1,8 @@
 #ifndef _WEBSERV_H
 #define _WEBSERV_H
+#include<string>
+#include "csapp.h"
+using std::string;
 class webServ
 {
 	public:
@@ -8,14 +11,15 @@ class webServ
 		void servClose();
 		~webServ();
 	private:
-		void _openListenfd();
+		bool _openListenfd();
 		void _doit();
-		void _clientError(string _num,string _reason,string _text);
+		void _clientError(const char *cause,const char *errnum,const char *shortmsg,const char *longmsg);
 		void _printRequest(rio_t *rp);
 		void _servStatic();
 		void _servDynamic();
 		int listenfd,connfd,port;
-		string filename,cgiargs,filetype;
+		rio_t rio;
+		const char *filename,*cgiargs,*filetype;
 		int filesize;
 };
 #endif

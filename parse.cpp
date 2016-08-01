@@ -8,35 +8,31 @@ void parse::_parseUri()
 {
 	if (_uri.find("cgi-bin")==-1)  //Static content	
 	{
-		_filename="."+uri;
-		if (uri=="/")
+		_filename="."+_uri;
+		if (_uri=="/")
 			_filename+="index.html";
 		_cgiargs="";
-		int index=uri.find_last_of('.');
-		_filetype=uri.substr(index,uri.length()-index);
+		int index=_uri.find_last_of('.');
+		_filetype=_uri.substr(index,_uri.length()-index);
 	}
 	else   //Dynamic content
 	{
 		int index;
-		if ((index=uri.find("?"))==-1) //No parameter
+		if ((index=_uri.find("?"))==-1) //No parameter
 		{
-			filename="."+uri;
-			cgiargs="";
+			_filename="."+_uri;
+			_cgiargs="";
 		}
 		else //Parameter
 		{
-			filename="."+uri.substr(0,index+1);
-			cgiargs=uri.substr(index,uri.length()-index)
+			_filename="."+_uri.substr(0,index+1);
+			_cgiargs=_uri.substr(index,_uri.length()-index);
 		}
 	}
 }
 bool parse::isStatic()
 {
-	return (uri.find("cgi-bin")==-1);
-}
-string parse::uri()
-{
-	return _uri;
+	return (_uri.find("cgi-bin")==-1);
 }
 string parse::filename()
 {
