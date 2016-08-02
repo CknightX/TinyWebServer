@@ -12,8 +12,8 @@ void parse::_parseUri()
 		if (_uri=="/")
 			_filename+="index.html";
 		_cgiargs="";
-		int index=_uri.find_last_of('.');
-		_filetype=_uri.substr(index,_uri.length()-index);
+		int index=_filename.find_last_of('.');
+		_filetype=_filename.substr(index,_filename.length()-index);
 	}
 	else   //Dynamic content
 	{

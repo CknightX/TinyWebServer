@@ -8,10 +8,9 @@ webServ::webServ(int _port)
 bool webServ::_openListenfd()
 {
 	int optval=1;
-	sockaddr_in servaddr;
+	struct sockaddr_in servaddr;
 	if ((listenfd=socket(AF_INET,SOCK_STREAM,0))<0)
 		return false;
-
 	// Eliminates "Address already in use" error from bind 
 	if (setsockopt(listenfd,SOL_SOCKET,SO_REUSEADDR,(const void *)(&optval),sizeof(int))<0)
 		return false;
@@ -19,8 +18,8 @@ bool webServ::_openListenfd()
 	bzero((char*)(&servaddr),sizeof(servaddr));
 	servaddr.sin_family=AF_INET;
 	servaddr.sin_addr.s_addr=htonl(INADDR_ANY);
-	servaddr.sin_port=htons((unsigned short)(port));
-	if (bind(listenfd,(SA*)(&servaddr),sizeof(servaddr))<0);
+	servaddr.sin_port=htons((unsigned short)port);
+	if (bind(listenfd,(SA*)&servaddr,sizeof(servaddr))<0)
 		return false;
 	if (listen(listenfd,LISTENQ)<0)
 		return false;
@@ -63,13 +62,13 @@ void webServ::_doit()
 				"Tiny couldn't find this file");
 		return;
 	}                                                    //line:netp:doit:endnotfound
-
 	if (is_static) { /* Serve static content */          
 		if (!(S_ISREG(sbuf.st_mode)) || !(S_IRUSR & sbuf.st_mode)) { //line:netp:doit:readable
 			_clientError(filename, "403", "Forbidden",
 					"Tiny couldn't read the file");
 			return;
 		}
+		filesize=sbuf.st_size;
 		_servStatic();        //line:netp:doit:servestatic
 	}
 	else { /* Serve dynamic content */
