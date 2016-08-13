@@ -15,11 +15,14 @@ class webServ
 		void _doit();
 		void _clientError(const char *cause,const char *errnum,const char *shortmsg,const char *longmsg);
 		void _printRequest(rio_t *rp);
-		void _servStatic();
-		void _servDynamic();
+		void _getStatic();
+		void _getDynamic();
+		void _postDynamic();
+		void _postRequestHdrs();
+		void _getRequestHdrs();
 		int listenfd,connfd,port;
-		rio_t rio;
 		const char *filename,*cgiargs,*filetype;
-		int filesize;
+		int filesize,contentlength;
+		rio_t rio;
 };
 #endif
