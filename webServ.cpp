@@ -1,6 +1,7 @@
 #include "webServ.h"
 #include "parse.h"
 #include<cstdio>
+inline void sigChld(int signo);
 webServ::webServ(int _port)
 	:port(_port)
 {
@@ -27,15 +28,24 @@ bool webServ::_openListenfd()
 }
 void webServ::servStart()
 {
+	Signal(SIGCHLD,sigChld);
 	struct sockaddr_in clientaddr; //save client's addr
 	int clientlen;
 	_openListenfd();
+	pid_t pid;
 	while(1)
 	{
 		clientlen=sizeof(clientaddr);
 		connfd=Accept(listenfd,(SA*)&clientaddr,(socklen_t*)&clientlen);
-		_doit();
-		Close(connfd);
+		if ((pid=Fork())==0) //child process
+		{
+			_doit();
+			exit(1);
+		}
+		else if (pid>0)  //parent process
+		{
+			Close(connfd);
+		}
 	}
 }
 void webServ::_doit()
@@ -155,4 +165,10 @@ void webServ::servClose()
 }
 webServ::~webServ()
 {
+}
+
+inline void sigChld(int signo)
+{
+	Waitpid(-1,NULL,WNOHANG);
+	return;
 }
