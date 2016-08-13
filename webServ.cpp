@@ -88,7 +88,7 @@ void webServ::_doit()
 			return;
 		}
 		filesize=sbuf.st_size;
-		_servStatic();        
+		_getStatic();        
 	}
 	else { /* Serve dynamic content */
 		if (!(S_ISREG(sbuf.st_mode)) || !(S_IXUSR & sbuf.st_mode)) { 
@@ -96,7 +96,7 @@ void webServ::_doit()
 					"Tiny couldn't run the CGI program");
 			return;
 		}
-		_servDynamic();            
+		_getDynamic();            
 	}
 
 }
@@ -141,14 +141,15 @@ void webServ::_postDynamic()
 {
 	char buf[MAXLINE], *emptylist[] = { NULL }; /*parameter*/
 	char data[MAXLINE];
+	char length[MAXLINE];
 	int p[2]; /*Pipe*/
-	Pipe(p);
+	pipe(p);
 
 	if (Fork() == 0) /* child */
 	{
 		Close(p[0]);
-		Rio_readnb(&rio,data,Content-length);
-		Rio_writen(p[1],buf,Content-length);
+		Rio_readnb(&rio,data,contentlength);
+		Rio_writen(p[1],buf,contentlength);
 		exit(0);
 	}
 	
@@ -157,7 +158,7 @@ void webServ::_postDynamic()
 	Rio_writen(connfd, buf, strlen(buf));
 	sprintf(buf, "Server: Tiny Web Server\r\n");
 	Rio_writen(connfd, buf, strlen(buf));
-	
+	sprintf(length,"%s",contentlength);
 	Dup2(p[0],STDIN_FILENO);
 	Close(p[0]);
 	Close(p[1]);
